@@ -54,7 +54,7 @@ const ConnectButton = () => {
 
   return (
     <Button size="sm" onClick={handleAuth} colorScheme="blue">
-      Connect Wallet
+      Connect
     </Button>
   );
 };

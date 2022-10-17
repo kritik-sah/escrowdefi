@@ -1,20 +1,32 @@
 import { ChakraProvider } from '@chakra-ui/react';
-import { createClient, configureChains, defaultChains, WagmiConfig } from 'wagmi';
+import { createClient, configureChains, chain, WagmiConfig } from 'wagmi';
 import { extendTheme } from '@chakra-ui/react';
 import { publicProvider } from 'wagmi/providers/public';
 import { SessionProvider } from 'next-auth/react';
 import type { AppProps } from 'next/app';
+import { getDefaultWallets, RainbowKitProvider } from '@rainbow-me/rainbowkit';
+import '@rainbow-me/rainbowkit/styles.css';
 
-const { provider, webSocketProvider } = configureChains(defaultChains, [publicProvider()]);
+const { provider, webSocketProvider, chains } = configureChains(
+  [chain.mainnet, chain.goerli, chain.polygon, chain.polygonMumbai],
+  [publicProvider()],
+);
+
+const { connectors } = getDefaultWallets({
+  appName: 'Cryptolancer dapp',
+  chains,
+});
 
 const client = createClient({
   provider,
   webSocketProvider,
   autoConnect: true,
+  // added connectors from rainbowkit
+  connectors,
 });
 
 const config = {
-  initialColorMode: 'dark',
+  initialColorMode: 'light',
   useSystemColorMode: false,
 };
 
@@ -25,7 +37,9 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
     <ChakraProvider resetCSS theme={theme}>
       <WagmiConfig client={client}>
         <SessionProvider session={pageProps.session} refetchInterval={0}>
-          <Component {...pageProps} />
+          <RainbowKitProvider chains={chains}>
+            <Component {...pageProps} />
+          </RainbowKitProvider>
         </SessionProvider>
       </WagmiConfig>
     </ChakraProvider>
